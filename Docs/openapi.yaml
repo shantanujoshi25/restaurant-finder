@@ -1,0 +1,322 @@
+openapi: 3.0.3
+info:
+  title: Restaurant Finder API
+  version: 1.1.0
+  description: |-
+    This document contains the Swagger specification defining the REST API endpoints for Restaurant Finder application. The API allows users to search, review, and interact with restaurants on application.
+
+servers:
+  - url: https://NA{yet to be decided}
+tags:
+  - name: restaurants
+    description: Restaurant operations
+  - name: users
+    description: User operations
+  - name: auth
+    description: Authentication operations
+  - name: categories
+    description: Category operations
+
+paths:
+  /restaurants:
+    get:
+      summary: Search for restaurants
+      tags:
+        - restaurants
+      parameters:
+        - in: query
+          name: name
+          schema:
+            type: string
+        - in: query
+          name: category
+          schema:
+            type: string
+        - in: query
+          name: priceRange
+          schema:
+            type: string
+            enum: [LOW, MEDIUM, HIGH]
+        - in: query
+          name: rating
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Restaurant'
+    
+    post:
+      summary: Add a new restaurant
+      tags:
+        - restaurants
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Restaurant'
+      responses:
+        '201':
+          description: Restaurant created
+
+  /restaurants/{restaurantId}:
+    get:
+      summary: Get restaurant details
+      tags:
+        - restaurants
+      parameters:
+        - in: path
+          name: restaurantId
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Restaurant'
+
+    put:
+      summary: Update restaurant details
+      tags:
+        - restaurants
+      parameters:
+        - in: path
+          name: restaurantId
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Restaurant'
+      responses:
+        '200':
+          description: Restaurant updated
+
+  /restaurants/{restaurantId}/reviews:
+    get:
+      summary: Get reviews for a restaurant
+      tags:
+        - restaurants
+      parameters:
+        - in: path
+          name: restaurantId
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Review'
+
+    post:
+      summary: Submit a review
+      tags:
+        - restaurants
+      parameters:
+        - in: path
+          name: restaurantId
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Review'
+      responses:
+        '201':
+          description: Review created
+
+  /users:
+    post:
+      summary: Register a new user
+      tags:
+        - users
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/User'
+      responses:
+        '201':
+          description: User registered
+
+  /users/{userId}:
+    put:
+      summary: Update user profile
+      tags:
+        - users
+      parameters:
+        - in: path
+          name: userId
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/User'
+      responses:
+        '200':
+          description: User profile updated
+
+  /auth/login:
+    post:
+      summary: User login
+      tags:
+        - auth
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                username:
+                  type: string
+                password:
+                  type: string
+      responses:
+        '200':
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token:
+                    type: string
+
+  /categories:
+    get:
+      summary: Get all categories
+      tags:
+        - categories
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Category'
+
+components:
+  schemas:
+    User:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        username:
+          type: string
+        password:
+          type: string
+        email:
+          type: string
+        phone:
+          type: integer
+          format: int64
+        role:
+          $ref: '#/components/schemas/Role'
+
+    Role:
+      type: string
+      enum: [USER, ADMIN, BUSINESS_OWNER]
+
+    Restaurant:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        name:
+          type: string
+        address:
+          type: string
+        email:
+          type: string
+        phone:
+          type: integer
+          format: int64
+        description:
+          type: string
+        hours:
+          $ref: '#/components/schemas/OpenHours'
+        priceRange:
+          $ref: '#/components/schemas/PriceRange'
+        categories:
+          type: array
+          items:
+            $ref: '#/components/schemas/Category'
+        rating:
+          type: string
+        photo:
+          type: string
+          format: binary
+
+    Review:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        restaurant_id:
+          type: integer
+          format: int64
+        rating:
+          type: integer
+        comment:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+
+    Category:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        name:
+          type: string
+
+    OpenHours:
+      type: object
+      properties:
+        schedule:
+          type: object
+          additionalProperties:
+            type: string
+
+    PriceRange:
+      type: string
+      enum: [LOW, MEDIUM, HIGH]
